@@ -1,6 +1,11 @@
 # Import necessary libraries
 import random
+from utils import GenetarteKeys, Sign, Verify
 
+NUMBER_OF_NODES = 0
+public_keys_dict = {}
+memPool = []
+balance = {}
 # Define the consensus algorithm function
 def consensus_algorithm(nodes, blocks):
     # Select a block for validation
@@ -53,19 +58,52 @@ def practical_byzantine_fault_tolerance(node, block):
 
 # Define the Node class
 class Node:
-    def __init__(self, stake):
+    def __init__(self, stake, balance):
         self.stake = stake
-        self.balance = 0
+        self.balance = balance
+        self.private_key, self.public_key = GenetarteKeys()
+        self.id = NUMBER_OF_NODES + 1
+        NUMBER_OF_NODES += 1
+        public_keys_dict[self.id] = self.public_key
+        balance[self.id] = self.balance
+
     
     def validate_block(self, block):
         # Placeholder function for block validation
+
+        for transaction in block.transactions:
+            pub_key = public_keys_dict[transaction.from_address]
+
+            #verifty the signature of the transaction
+            if Verify(transaction.value_byte, transaction.signature, pub_key) == False:
+                return False
+            #check if the sender has enough balance
+            if transaction.value > balance[transaction.from_address]:
+                return False
         return True
+    
+    def GenerateTransaction(self, to_address, value):
+        
+        message = str(self.id) + ":" + str(to_address) + ":" + str(value)
+
+        # Sign the message using the private key of the sender
+
+        signature = Sign(message.encode("utf-8"), self.private_key)
+
+        # Create a transaction
+
+        transaction = Transaction(self.id, to_address, value, signature, message)
+        
+        memPool.append(transaction)
 
 class Transaction:
-    def __init__(self, from_address, to_address, value):
+    def __init__(self, from_address, to_address, value, signature, value_byte):
         self.value = value
         self.from_address = from_address
         self.to_address = to_address
+        self.signature = signature
+        self.value_byte = value_byte
+
 
 
 class Block:
