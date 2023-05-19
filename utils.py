@@ -1,15 +1,16 @@
 import rsa
+from merkly.mtree import MerkleTree
 
 def GenetarteKeys():
     public_key, private_key = rsa.newkeys(1024)
-    return public_key, private_key
+    return private_key, public_key
 
 
-def Sign(message, private_key):
+def Sign(message: bytes, private_key: rsa.PrivateKey) -> bytes:
    return rsa.sign(message, private_key, "SHA-256")
     
 
-def Verify(message, signature, public_key):
+def Verify(message: bytes, signature: bytes, public_key: rsa.PublicKey) -> bool:
     try:
         rsa.verify(message, signature, public_key)
         return True
@@ -17,11 +18,13 @@ def Verify(message, signature, public_key):
         return False
 
 
-""" if __name__ == "__main__":
-    print("Main")
-    public_key, private_key = rsa.newkeys(1024)
-    sec, secKey = rsa.newkeys(1024)
-    message = 'A message for signing'
-    test = Sign(message.encode("utf-8"), private_key)
-    print(Verify(message, test, public_key))
-    print(Verify(message, test, sec)) """
+def ConstructMerkleTree(transactionList: list[str]) -> MerkleTree:
+    mtree = MerkleTree(transactionList)
+    return mtree
+
+
+def VerifyMerkleTree(mtree: MerkleTree, node: str) -> bool:
+    proof = mtree.proof(node)
+    return mtree.verify(proof)
+
+
