@@ -3,6 +3,7 @@ import random
 import hashlib
 from utils import GenetarteKeys, Sign, Verify
 from model import Node, blockchain, Block, balances, memPool
+import time
 
 
 def consensus_algorithm(nodes):
@@ -68,19 +69,25 @@ def update_balances(block: Block) -> None:
 if __name__ == "__main__":
 
     nodes = [Node(100, 200), Node(50, 120), Node(25, 100), Node(10, 70)]
-    nodes[0].GenerateTransaction(2, 50)
-    nodes[0].GenerateTransaction(3, 50)
-    nodes[2].GenerateTransaction(4, 50)
-    nodes[3].GenerateTransaction(1, 20)
+
+    start = time.time()
+    nodes[0].GenerateTransaction(nodes[1].id, 50)
+    nodes[0].GenerateTransaction(nodes[2].id, 50)
+    nodes[2].GenerateTransaction(nodes[3].id, 50)
+    nodes[3].GenerateTransaction(nodes[0].id, 20)
 
     consensus_algorithm(nodes)
 
-    nodes[0].GenerateTransaction(2, 30)
-    nodes[0].GenerateTransaction(3, 20)
-    nodes[2].GenerateTransaction(4, 50)
-    nodes[3].GenerateTransaction(1, 20)
+    nodes[0].GenerateTransaction(nodes[2].id, 30)
+    nodes[0].GenerateTransaction(nodes[3].id, 20)
+    nodes[2].GenerateTransaction(nodes[3].id, 50)
+    nodes[3].GenerateTransaction(nodes[1].id, 20)
 
     consensus_algorithm(nodes)
+
+    end = time.time()
+
+    print("Time taken: ", end - start)
 
 
 

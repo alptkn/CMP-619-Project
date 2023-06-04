@@ -58,6 +58,7 @@ class Node:
         self.balance = balance
         self.private_key, self.public_key = GenetarteKeys()
         self.id = str(uuid.uuid4())
+        global NUMBER_OF_NODES
         NUMBER_OF_NODES += 1
         public_keys_dict[self.id] = self.public_key
         balances[self.id] = self.balance
